@@ -87,83 +87,40 @@ export class MessageData {
     return { messages: result.map(chatMessageToObject), hasMore };
   }
 
-  async delete(messageId: ObjectID): Promise<ChatMessage> {
-    const filterBy = { _id: messageId };
-    const updateProperty = { deleted: true };
+  async updateProperty(
+    messageId: ObjectID,
+    updateProperty: Record<string, unknown>,
+  ): Promise<ChatMessage> {
     const result = await this.chatMessageModel.findOneAndUpdate(
-      filterBy,
+      { _id: messageId },
       updateProperty,
       {
         new: true,
         returnOriginal: false,
       },
     );
-    if (!result) throw new Error('Message to be deleted not found');
-    return chatMessageToObject(result); // Minimum to pass ts checks -replace this
+    if (!result) throw new Error('Message to update not found');
+    return chatMessageToObject(result);
+  }
+
+  async delete(messageId: ObjectID): Promise<ChatMessage> {
+    return this.updateProperty(messageId, { deleted : true});
   }
 
   async resolve(messageId: ObjectID): Promise<ChatMessage> {
-    const filterBy = { _id: messageId };
-    const updateProperty = { resolved: true };
-    const resolved = await this.chatMessageModel.findOneAndUpdate(
-      filterBy,
-      updateProperty,
-      {
-        new: true,
-        returnOriginal: false,
-      },
-    );
-    if (!resolved) throw new Error('The message to resolve does not exist');
-    return chatMessageToObject(resolved);
+    return this.updateProperty(messageId, { resolved: true });
   }
 
   async unresolve(messageId: ObjectID): Promise<ChatMessage> {
-    const filterBy = { _id: messageId };
-    const updateProperty = { resolved: false };
-    const unresolved = await this.chatMessageModel.findOneAndUpdate(
-      filterBy,
-      updateProperty,
-      {
-        new: true,
-        returnOriginal: false,
-      },
-    );
-    if (!unresolved) throw new Error('The message to unresolve does not exist');
-    return chatMessageToObject(unresolved);
+    return this.updateProperty(messageId, { resolved: false });
   }
 
   async like(userId: ObjectID, messageId: ObjectID): Promise<ChatMessage> {
-    const query = { _id: messageId };
-    const updateDocument = {
-      $addToSet: { likes: userId },
-    };
-    const like = await this.chatMessageModel.findOneAndUpdate(
-      query,
-      updateDocument,
-      {
-        new: true,
-        returnOriginal: false,
-      },
-    );
-    if (!like) throw new Error('The message to like does not exist');
-    return chatMessageToObject(like);
+    return this.updateProperty(messageId, { $addToSet: { likes: userId } });
   }
 
   async unlike(userId: ObjectID, messageId: ObjectID): Promise<ChatMessage> {
-    const query = { _id: messageId };
-    const updateDocument = {
-      $pull: { likes: userId },
-    };
-    const unlike = await this.chatMessageModel.findOneAndUpdate(
-      query,
-      updateDocument,
-      {
-        new: true,
-        returnOriginal: false,
-      },
-    );
-    if (!unlike) throw new Error('The message to unlike does not exist');
-    return chatMessageToObject(unlike);
+    return this.updateProperty(messageId, { $pull: { likes: userId } });
   }
 
   async addReaction(
