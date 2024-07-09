@@ -123,6 +123,44 @@ export class MessageData {
     return this.updateProperty(messageId, { $pull: { likes: userId } });
   }
 
+  /**
+   * Adds a tag to a message.
+   * Confirms the user adding the tag is the sender of the message.
+   * @param tag The tag to add
+   * @param userId The user adding the tag
+   * @param messageId The message to add the tag to
+   * @param tagId The id of the tag to add
+   * @returns The updated message
+   */
+  async addTag(tag: string, userId: ObjectID, messageId: ObjectID, tagId : ObjectID = new ObjectID()): Promise<ChatMessage> {
+    const updatedResult = await this.chatMessageModel.bulkWrite([
+      {
+        updateOne: {
+          filter: {
+            _id: messageId,
+            senderId: userId,
+          },
+          update: {
+            $push: {
+              tags: {
+                _id: tagId,
+                tag: tag,
+              },
+            },
+          },
+        },
+      }
+    ]);
+
+    if (!updatedResult || updatedResult.matchedCount === 0) {
+      throw new Error(
+        `Failed to add tag, messageId: ${messageId.toHexString()}, tag: ${tag}, userId: ${userId.toHexString()}`,
+      );
+    }
+
+    return this.getMessage(messageId.toHexString());
+  }
+
   async addReaction(
     reaction: string,
     userId: ObjectID,

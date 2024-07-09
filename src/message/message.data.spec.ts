@@ -124,4 +124,18 @@ describe('MessageData', () => {
       expect(deletedMessage.deleted).toEqual(true);
     });
   });
+
+  describe('addTag', () => {
+    it('successfully adds a tag to a message', async () => {
+      const conversationId = new ObjectID();
+      const message = await messageData.create(
+        { conversationId, text: 'Message to tag' },
+        senderId,
+      );
+
+      const tagId = new ObjectID();
+      const taggedMessage = await messageData.addTag('example tag', senderId, new ObjectID(message.id), tagId);
+      expect(taggedMessage.tags).toEqual([{ _id: tagId, tag: 'example tag' }]);
+    });
+  });
 });

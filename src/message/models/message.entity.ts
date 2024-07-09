@@ -3,7 +3,7 @@ import { ObjectID } from 'mongodb';
 import { UserField, MessageSender } from '../../user/models/user.model';
 import { ChatConversation } from '../../conversation/models/ChatConversation.entity';
 import { AttachmentType, GifType } from './message.dto';
-import { Reaction } from './message.model';
+import { Reaction, Tag } from './message.model';
 
 class ReplyMessageSocket {
   text?: string;
@@ -113,6 +113,11 @@ export class ChatMessageData {
   sender: UserField;
 }
 
+/**
+ * Represents a chat message
+ * @see ChatMessageModel
+ * @see SocketChatMessage - Add new fields to both classes
+ */
 @ObjectType()
 @Directive('@key(fields: "id")')
 export class ChatMessage {
@@ -146,14 +151,19 @@ export class ChatMessage {
   @Field(() => [Reaction], { nullable: true })
   reactions?: Reaction[];
 
+  @Field(() => [Tag], { nullable: true })
+  tags?: Tag[];
+
   @Field({ defaultValue: false, nullable: true })
   isSenderBlocked?: boolean;
 }
 
 /***
+ * Represents a chat message to be sent over the socket
  * compare ChatMessage and SocketChatMessage when adding new field
+ * @see ChatMessageModel
+ * @see ChatMessage
  */
-
 export class SocketChatMessage {
   id: ObjectID;
 
@@ -174,6 +184,8 @@ export class SocketChatMessage {
   richContent?: RichMessageContent;
 
   reactions?: Reaction[];
+
+  tags?: Tag[];
 
   isSenderBlocked?: boolean;
 }
