@@ -138,4 +138,38 @@ describe('MessageData', () => {
       expect(taggedMessage.tags).toEqual([{ _id: tagId, tag: 'example tag' }]);
     });
   });
+
+  describe('updateTag', () => {
+    it('successfully updates a tag on a message', async () => {
+      const conversationId = new ObjectID();
+      const message = await messageData.create(
+        { conversationId, text: 'Message to tag' },
+        senderId,
+      );
+
+      const tagId = new ObjectID();
+      await messageData.addTag('example tag', senderId, new ObjectID(message.id), tagId);
+
+      const updatedMessage = await messageData.updateTag('updated tag', senderId, new ObjectID(message.id), tagId);
+      expect(updatedMessage.tags).toEqual([{ _id: tagId, tag: 'updated tag' }]);
+    });
+  });
+
+  describe('findTags', () => {
+    it ('successfully finds tags', async () => {
+      const conversationId = new ObjectID();
+      const message = await messageData.create(
+        { conversationId, text: 'Message to tag' },
+        senderId,
+      );
+
+      const tagIds = [new ObjectID(), new ObjectID(), new ObjectID()];
+      await messageData.addTag('first tag', senderId, new ObjectID(message.id), tagIds[0]);
+      await messageData.addTag('second tag', senderId, new ObjectID(message.id), tagIds[1]);
+      await messageData.addTag('third tag', senderId, new ObjectID(message.id), tagIds[2]);
+
+      const foundMessages = await messageData.findMessagesByTags(['first tag', 'second tag']);
+      expect(foundMessages).toHaveLength(1);
+    });
+  });
 });

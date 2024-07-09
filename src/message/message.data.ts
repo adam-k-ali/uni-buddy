@@ -161,6 +161,45 @@ export class MessageData {
     return this.getMessage(messageId.toHexString());
   }
 
+  async updateTag(tag: string, userId: ObjectID, messageId: ObjectID, tagId: ObjectID): Promise<ChatMessage> {
+    const updatedResult = await this.chatMessageModel.bulkWrite([
+      {
+        updateOne: {
+          filter: {
+            _id: messageId,
+            'tags._id': tagId,
+          },
+          update: {
+            $set: {
+              'tags.$.tag': tag,
+            },
+          },
+        },
+      }
+    ]);
+
+    if (!updatedResult || updatedResult.matchedCount === 0) {
+      throw new Error(
+        `Failed to update tag, messageId: ${messageId.toHexString()}, tag: ${tag}, userId: ${userId.toHexString()}`,
+      );
+    }
+
+    return this.getMessage(messageId.toHexString());
+  }
+
+  async findMessagesByTags(tags: string[]): Promise<ChatMessage[]> {
+    const messages = await this.chatMessageModel.find({
+      tags: {
+        $elemMatch: {
+          tag: {
+            $in: tags,
+          },
+        },
+      },
+    });
+    return messages.map((message) => chatMessageToObject(message));
+  }
+
   async addReaction(
     reaction: string,
     userId: ObjectID,
