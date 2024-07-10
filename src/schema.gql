@@ -29,13 +29,13 @@ type Reaction {
   userIds: [String!]!
 }
 
-type ChatConversation {
-  id: ID!
-  unreadMessageCount: Int
-  lastMessage: ChatMessage
-  pinnedMessages: [ChatMessage!]!
-  pinnedMessagesCount: Int!
+type Tag {
+  tag: String!
+  id: ObjectId!
 }
+
+"""ObjectId custom scalar type"""
+scalar ObjectId
 
 type UserField {
   id: String
@@ -44,9 +44,6 @@ type UserField {
 type ReplyMessage {
   id: ObjectId!
 }
-
-"""ObjectId custom scalar type"""
-scalar ObjectId
 
 type Giphy {
   id: String!
@@ -106,6 +103,7 @@ type ChatMessage {
   likesCount: Int!
   richContent: RichMessageContent
   reactions: [Reaction!]
+  tags: [Tag!]
   isSenderBlocked: Boolean
 }
 
@@ -117,6 +115,14 @@ scalar DateTime
 type PaginatedChatMessages {
   messages: [ChatMessage!]!
   hasMore: Boolean!
+}
+
+type ChatConversation {
+  id: ID!
+  unreadMessageCount: Int
+  lastMessage: ChatMessage
+  pinnedMessages: [ChatMessage!]!
+  pinnedMessagesCount: Int!
 }
 
 type LastRead {

@@ -174,12 +174,14 @@ export class ConversationController {
     @Query('conversationIds') conversationIds: string[],
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
+    @Query('tags') tags: string[],
     @Res({ passthrough: true }) res: Response,
   ): Promise<MessageGroupedByConversationOutput[]> {
     const messagesFilterInput: MessagesFilterInput = {
       startDate,
       endDate,
       conversationIds,
+      tags,
     };
     if (!isDateDifferenceWithin7Days(startDate, endDate)) {
       res.status(403).send('Duration must be with in 7 days');

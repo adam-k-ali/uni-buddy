@@ -305,6 +305,7 @@ export class MessageData {
     conversationIds: ObjectID[],
     startDate?: string,
     endDate?: string,
+    tags?: string[],
   ): Promise<MessageGroupedByConversationOutput[]> {
     const matchQuery: FilterQuery<ChatMessage> = {
       $match: {
@@ -320,6 +321,16 @@ export class MessageData {
         $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
       };
     }
+    if (tags) {
+      matchQuery['$match']['tags'] = {
+        $elemMatch: {
+          tag: {
+            $in: tags,
+          },
+        },
+      };
+    }
+    
     const groupedChatMessages = await this.chatMessageModel.aggregate([
       matchQuery,
       {
